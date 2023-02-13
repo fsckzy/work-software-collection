@@ -1,0 +1,41 @@
+pipeline {
+    agent any 
+    stages {
+	    stage('delete') {
+            steps {
+            deleteDir()
+            }
+        }
+        
+		stage('pullCode') {
+            steps {
+git branch: 'xx-master', credentialsId: '2fa', url: 'xxxxxx.git'}
+        }
+        
+        stage('build') {
+            steps {
+                sh 'mvn clean package'
+                // mvn -s 指定 settings.xml文件
+            }
+        }
+        
+        stage('deploy'){
+            steps {
+                sh '''
+                    ansible 192.168.96.60 -m shell -a "bash -x /root/houduan_add.sh ${JOB_NAME} "
+                    ansible nginx -m shell -a "/usr/local/nginx/sbin/nginx -s reload"
+                    build_number="${BUILD_NUMBER}"
+                    jar_name="${JOB_NAME}.jar" 
+                    rm -rf /tmp/${JOB_NAME} && mkdir /tmp/${JOB_NAME} && cp target/${JOB_NAME}-release.jar /tmp/${JOB_NAME} && cp -rvf target/lib /tmp/${JOB_NAME}/
+                    cp -r assemble/release/Dockerfile /tmp/${JOB_NAME}/Dockerfile
+					cd /tmp/${JOB_NAME} && docker build -t 192.168.96.239:18080/smy/$appId:${build_number} .
+                    docker push 192.168.96.239:18080/smy/$appId:${build_number}
+					wget  https://xxxxx.cn/shell/tsk8s_yaml.sh && chmod +x tsk8s_yaml.sh
+					./tsk8s_yaml.sh $appId $appPort $replicas $dcHost $REGISTRY $build_number
+					scp $appId.yaml 192.168.96.229:/tmp/
+                    ssh root@192.168.96.229 "kubectl apply -f /tmp/$appId.yaml"
+                '''
+            }
+        }
+    }
+}
