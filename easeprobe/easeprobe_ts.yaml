@@ -1,0 +1,127 @@
+tls:
+  - name: ssl证书过期检测
+    host: xx.cn:443
+#    proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
+                                    # Also support the `ALL_PROXY` environment.
+    insecure_skip_verify: true # dont check cert validity
+    expire_skip_verify: false # dont check cert expire date
+    alert_expire_before: 720h # alert if cert expire date is before X, the value is a Duration, see https://pkg.go.dev/time#ParseDuration. example: 1h, 1m, 1s. expire_skip_verify must be false to use this feature.
+    # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+    # root_ca_pem: |
+    #   -----BEGIN CERTIFICATE-----
+
+  - name: ssl证书过期检测
+    host: yy.cn:443
+#    proxy: socks5://proxy.server:1080 # Optional. Only support socks5.
+                                    # Also support the `ALL_PROXY` environment.
+    insecure_skip_verify: true # dont check cert validity
+    expire_skip_verify: false # dont check cert expire date
+    alert_expire_before: 168h # alert if cert expire date is before X, the value is a Duration, see https://pkg.go.dev/time#ParseDuration. example: 1h, 1m, 1s. expire_skip_verify must be false to use this feature.
+    # root_ca_pem_path: /path/to/root/ca.pem # ignore if root_ca_pem is present
+    # root_ca_pem: |
+    #   -----BEGIN CERTIFICATE-----
+
+
+
+http: # http probes
+  - name: prometheus
+    url: http://192.168.96.121:9090/prometheus/graph
+    username: admin
+    password: 123456
+  - name: zabbix
+    url: http://192.168.96.121/zabbix
+    username: admin
+    password: 123456
+
+tcp:
+  - name: nginx1
+    host: 192.168.96.60:80
+  - name: nginx2
+    host: 192.168.96.58:80
+  - name: nginx3
+    host: 192.168.96.15:80
+  - name: nginx4
+    host: 192.168.96.209:80
+  - name: redis-7000
+    host: 192.168.96.71:7000
+  - name: redis-7001
+    host: 192.168.96.71:7001
+  - name: redis-7002
+    host: 192.168.96.71:7002
+  - name: redis-7003
+    host: 192.168.96.84:7003
+  - name: redis-7004
+    host: 192.168.96.84:7004
+  - name: redis-7005
+    host: 192.168.96.84:7005
+  - name: redis-7006
+    host: 192.168.96.155:7006
+  - name: redis-7007
+    host: 192.168.96.155:7007
+  - name: redis-7008
+    host: 192.168.96.155:7008
+  - name: MongoDB
+    host: 192.168.96.71:27017
+  - name: zookeeper1
+    host: 192.168.96.223:2181
+  - name: zookeeper2
+    host: 192.168.96.241:2181
+  - name: zookeeper3
+    host: 192.168.96.82:2181
+  - name: rocketmq1
+    host: 192.168.96.158:9876
+  - name: rocketmq2
+    host: 192.168.96.134:9876
+  - name: rocketmq3
+    host: 192.168.96.31:9876
+  - name: nacos1
+    host: 192.168.96.223:8848
+  - name: nacos2
+    host: 192.168.96.241:8848
+  - name: nacos3
+    host: 192.168.96.82:8848
+  - name: nacos-vip
+    host: 192.168.96.174:8848
+  - name: k8s-es
+    host: 192.168.96.238:9200
+  - name: skywalking-es
+    host: 192.168.96.41:9200
+  - name: nginx-es
+    host: 192.168.96.101:9200
+  - name: account-es
+    host: 172.16.30.22:9203
+  - name: mysql
+    host: 172.16.30.22:9215
+
+
+
+settings:
+  time: "23:59"
+  timeformat: "2006-01-02 15:04:05 Z07:00"
+  # check the following link to see the time zone list
+  # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  timezone: "Asia/Shanghai" #  default: UTC
+  probe:
+    timeout: 30s # the time out for all probes
+    interval: 1m # probe every minute for all probes
+# SLA Report schedule
+sla:
+    #  minutely, hourly, daily, weekly (Sunday), monthly (Last Day), none
+  schedule: "weekly"
+    # UTC time, the format is 'hour:min:sec'
+  time: "23:59"
+
+
+# Notification Configuration
+notify:
+  dingtalk:
+    - name: "dingtalk alert service"
+      webhook: "https://oapi.dingtalk.com/robot/send?access_token=123456"
+      secret: "" # sign secret if set
+  log:
+    - name: log file # local log file
+      file: /var/log/easeprobe.log
+  http:
+    port: 8181
+    log:
+       file: /var/log/easeprobe-http-access.log #<---- access log file location
